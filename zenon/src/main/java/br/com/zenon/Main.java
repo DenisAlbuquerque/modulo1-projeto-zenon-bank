@@ -23,7 +23,6 @@ public class Main {
         IO.println(t2);
 
         IO.println("-----------------------------------------------------------");
-
         var transactionIngestor = new TransactionIngestor();
         List<Transaction> transactions = transactionIngestor.read("data/PS_20174392719_1491204439457_log.csv");
         IO.println(transactions.size());
@@ -31,5 +30,13 @@ public class Main {
         transactions.stream()
                     .limit(10)
                     .forEach(IO::println);
+
+        IO.println("-----------------------BadData----------------------------");
+        List<Transaction> transactionsBadData = transactionIngestor.read("data/paysim_with_bad_data.csv");
+        IO.println(transactionsBadData.size());
+
+        transactionsBadData.forEach(IO::println);
+
+
     }
 }

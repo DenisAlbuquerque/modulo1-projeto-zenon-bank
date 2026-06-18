@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class TransactionIngestor {
 
@@ -18,6 +20,9 @@ public class TransactionIngestor {
                    .skip(1)
                    .limit(1000)
                    .map(this::parseTransaction)
+                   //.filter(Objects::nonNull)
+                   .filter(Optional::isPresent)
+                   .map(Optional::get)
                    .toList();
 
         } catch (Exception e) {
@@ -26,20 +31,29 @@ public class TransactionIngestor {
 
     }
 
-    public Transaction parseTransaction(String linha) {
+    public Optional<Transaction> parseTransaction(String linha) {
 
-        String[] chuncks = linha.split(",");
+        try {
 
-        int step = Integer.parseInt(chuncks[0]);
-        TransactionType type = TransactionType.valueOf(chuncks[1]);
-        BigDecimal amount = new BigDecimal(chuncks[2]);
+            String[] chuncks = linha.split(",");
 
-        var origin = new TransactionCustomer(chuncks[3], new BigDecimal(chuncks[4]), new BigDecimal(chuncks[5]));
-        var recipient = new TransactionCustomer(chuncks[6], new BigDecimal(chuncks[7]), new BigDecimal(chuncks[8]));
+            int step = Integer.parseInt(chuncks[0]);
+            TransactionType type = TransactionType.valueOf(chuncks[1]);
 
-        boolean isFraud = "1".equals(chuncks[9]);
-        boolean isFlagFraud = "1".equals(chuncks[10]);
+            if(chuncks[2] == null || chuncks[2].trim().isEmpty()) throw new  IllegalArgumentException("O Valor de amount não poed ser nulo e nem vazio.");
+            BigDecimal amount = new BigDecimal(chuncks[2]);
 
-        return new Transaction(step, type, amount, origin, recipient, isFraud,isFlagFraud);
+            var origin = new TransactionCustomer(chuncks[3], new BigDecimal(chuncks[4]), new BigDecimal(chuncks[5]));
+            var recipient = new TransactionCustomer(chuncks[6], new BigDecimal(chuncks[7]), new BigDecimal(chuncks[8]));
+
+            boolean isFraud = "1".equals(chuncks[9]);
+            boolean isFlagFraud = "1".equals(chuncks[10]);
+
+            return Optional.of(new Transaction(step, type, amount, origin, recipient, isFraud, isFlagFraud));
+        } catch (Exception e) {
+            System.err.println("Erro ao processar linha: " + linha + " => " + e);
+           // e.printStackTrace();
+            return Optional.empty();
+        }
     }
 }
