@@ -2,6 +2,7 @@ package br.com.zenon;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
 
@@ -27,7 +28,7 @@ public class Main {
         List<Transaction> transactions = transactionIngestor.read("data/PS_20174392719_1491204439457_log.csv");
         IO.println(transactions.size());
 
-        transactions.stream()
+        /*transactions.stream()
                     .limit(10)
                     .forEach(IO::println);
 
@@ -35,8 +36,38 @@ public class Main {
         List<Transaction> transactionsBadData = transactionIngestor.read("data/paysim_with_bad_data.csv");
         IO.println(transactionsBadData.size());
 
-        transactionsBadData.forEach(IO::println);
+        transactionsBadData.forEach(IO::println);*/
 
+        IO.println("--------------------Fraudes----------------------");
 
+        var fraudAnalyze = new FraudAnalyze(transactions);
+
+        var totalFrauds = fraudAnalyze.countFrauds();
+        IO.println("Total de Fraudes: " + totalFrauds);
+
+        IO.println("-----------------Maiores  fraudes-------------------------");
+
+        var highFrauds = fraudAnalyze.findHighestValueFrauds(3);
+        highFrauds
+                .stream()
+                .map(Transaction::amount)
+                .forEach(IO::println);
+
+        IO.println("-----------------Maiores fraudadores-------------------------");
+
+        var suspiciousClients = fraudAnalyze.findHighestSuspicious(5);
+        suspiciousClients.forEach(IO::println);
+
+        IO.println("-----------------Prejuizo Total com fraudes-------------------------");
+
+        BigDecimal totalPrejuizos =  fraudAnalyze.calculateTotalFraudLoss();
+        IO.println( "Prejuizo total: " + totalPrejuizos);
+
+        IO.println("-----------------Fraudes saida e entrada-------------------------");
+
+        Map<TransactionType, Long> fraudCountType =  fraudAnalyze.countFraudsType();
+
+        IO.println("Fraudes por tipo:" );
+        IO.println(fraudCountType);
     }
 }
