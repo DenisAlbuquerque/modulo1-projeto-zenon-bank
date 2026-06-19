@@ -28,7 +28,7 @@ public class Main {
         List<Transaction> transactions = transactionIngestor.read("data/PS_20174392719_1491204439457_log.csv");
         IO.println(transactions.size());
 
-        /*transactions.stream()
+        transactions.stream()
                     .limit(10)
                     .forEach(IO::println);
 
@@ -36,7 +36,7 @@ public class Main {
         List<Transaction> transactionsBadData = transactionIngestor.read("data/paysim_with_bad_data.csv");
         IO.println(transactionsBadData.size());
 
-        transactionsBadData.forEach(IO::println);*/
+        transactionsBadData.forEach(IO::println);
 
         IO.println("--------------------Fraudes----------------------");
 
@@ -69,5 +69,36 @@ public class Main {
 
         IO.println("Fraudes por tipo:" );
         IO.println(fraudCountType);
+
+        IO.println("-----------------Busca por nome-------------------------");
+        IO.println("-----------------Não encontrada-------------------------");
+
+        TransactionListRepository transactionRepository;
+
+        transactionRepository = new TransactionListRepository(transactions);
+        var notFoundOriginName = "c12345";
+        transactionRepository.findByOriginName(notFoundOriginName)
+                .ifPresentOrElse(IO::println, () -> IO.println("Nenhum transaction encontrado: " + notFoundOriginName ));
+
+        IO.println("-----------------Encontrada com time-------------------------");
+        var existingOriginNameTime = "C1868032458";
+
+        long startTimeList = System.nanoTime();
+        transactionRepository.findByOriginName(existingOriginNameTime)
+                .ifPresentOrElse(IO::println, () -> IO.println("Nenhum transaction encontrado:  " + existingOriginNameTime ));
+        long endTimeList = System.nanoTime();
+        IO.println("tempo de busca com List : " +  (endTimeList - startTimeList) / 1_000_000.0 + " ms");
+
+        IO.println("-----------------Encontrada com time usando Map-------------------------");
+        TransactionMapRepository TransactionMapRepository;
+        TransactionMapRepository = new TransactionMapRepository(transactions);
+
+        startTimeList = System.nanoTime();
+        TransactionMapRepository.findByOriginName(existingOriginNameTime)
+                .ifPresentOrElse(IO::println, () -> IO.println("Nenhum transaction encontrado:  " + existingOriginNameTime ));
+        endTimeList = System.nanoTime();
+        IO.println("tempo de busca com Map : " +  (endTimeList - startTimeList) / 1_000_000.0 + " ms");
+
+
     }
 }
