@@ -5,12 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class TransactionIngestor {
 
-    private static final long FRAUD_LIMIT = 100_000;
+    private static final long FRAUD_LIMIT = 1_000;
 
     public List<Transaction> read(String fileName) {
 
@@ -20,7 +19,7 @@ public class TransactionIngestor {
 
            return lines.stream()
                    .skip(1)
-                   //.limit(FRAUD_LIMIT)
+                   .limit(FRAUD_LIMIT)
                    .map(this::parseTransaction)
                    //.filter(Objects::nonNull)
                    .filter(Optional::isPresent)
